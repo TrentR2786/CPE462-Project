@@ -13,6 +13,10 @@ int main(int argc, char* argv[]) {
     cout << "Could not open or find the image" << endl;
     return -1;
   }
+
+  imshow("Input Image", image);
+  waitKey(0);
+  destroyWindow("Input Image");
 // ---------------------------------------------------
 
 
