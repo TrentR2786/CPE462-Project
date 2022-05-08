@@ -5,8 +5,9 @@ using namespace std;
 using namespace cv;
 
 int main(int argc, char* argv[]) {
-
-// Code sources: https://www.opencv-srf.com/2017/11/load-and-display-image.html, imgproc.cpp (Class)
+  // Code sources:
+  // https://www.opencv-srf.com/2017/11/load-and-display-image.html, imgproc.cpp
+  // (Class)
   Mat image = imread(argv[1]);
 
   if (image.empty()) {
@@ -17,7 +18,8 @@ int main(int argc, char* argv[]) {
   imshow("Input Image", image);
   waitKey(0);
   destroyWindow("Input Image");
-// ---------------------------------------------------
 
-
+  Mat_<uchar> image_gray(image.rows, image.cols);
+  cvtColor(image, image_gray, COLOR_BGR2GRAY);
+  // ---------------------------------------------------
 }
