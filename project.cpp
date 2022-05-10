@@ -27,12 +27,21 @@ int main(int argc, char* argv[]) {
   Mat_<uchar> image_gray(image.rows, image.cols);
   cvtColor(image, image_gray, COLOR_BGR2GRAY);
 
-  /*******************************************/
-  string Text, image_path = argv[1];
-  tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
+  /*****************************************/
+
+  /*****************************************
+  Code source:
+  https://medium.com/building-a-simple-text-correction-tool/basic-ocr-with-tesseract-and-opencv-34fae6ab3400
+*/
+
+  string text, image_path = argv[1];
+  tesseract::TessBaseAPI* ocr = new tesseract::TessBaseAPI();
   ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
   ocr->SetImage(image.data, image.cols, image.rows, 3, image.step);
-  Text = string(ocr->GetUTF8Text ());
-  cout << Text;
+
+  text = string(ocr->GetUTF8Text());
+  cout << text;
   ocr->End();
+
+  /*****************************************/
 }
