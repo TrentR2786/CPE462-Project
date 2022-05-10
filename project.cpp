@@ -1,4 +1,4 @@
-#include <leptronica/allheaders.h>
+#include <leptonica/allheaders.h>
 #include <tesseract/baseapi.h>
 
 #include <iostream>
