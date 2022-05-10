@@ -28,4 +28,11 @@ int main(int argc, char* argv[]) {
   cvtColor(image, image_gray, COLOR_BGR2GRAY);
 
   /*******************************************/
+  string Text, image_path = argv[1];
+  tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
+  ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
+  ocr->SetImage(image.data, image.cols, image.rows, 3, image.step);
+  Text = string(ocr->GetUTF8Text ());
+  cout << Text;
+  ocr->End();
 }
