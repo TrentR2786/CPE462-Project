@@ -34,12 +34,12 @@ int main(int argc, char* argv[]) {
   https://medium.com/building-a-simple-text-correction-tool/basic-ocr-with-tesseract-and-opencv-34fae6ab3400
 */
 
-  string text, image_path = argv[1];
   tesseract::TessBaseAPI* ocr = new tesseract::TessBaseAPI();
   ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
-  ocr->SetImage(image.data, image.cols, image.rows, 3, image.step);
+  ocr->SetPageSegMode(tesseract::PSM_AUTO);
+  ocr->SetImage(image_gray.data, image.cols, image.rows, 1, image_gray.step);
 
-  text = string(ocr->GetUTF8Text());
+  string text = string(ocr->GetUTF8Text());
   cout << text;
   ocr->End();
 
