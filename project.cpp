@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <sstream>
 #include <string>
 
 using namespace std;
@@ -24,7 +25,10 @@ int main(int argc, char* argv[]) {
   waitKey(0);
   destroyWindow("Input Image");
 
-  Mat_<uchar> image_gray(image.rows, image.cols);
+  int rows = image.rows;
+  int cols = image.cols;
+
+  Mat_<uchar> image_gray(rows, cols);
   cvtColor(image, image_gray, COLOR_BGR2GRAY);
 
   /*****************************************/
@@ -37,7 +41,7 @@ int main(int argc, char* argv[]) {
   tesseract::TessBaseAPI* ocr = new tesseract::TessBaseAPI();
   ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
   ocr->SetPageSegMode(tesseract::PSM_AUTO);
-  ocr->SetImage(image_gray.data, image.cols, image.rows, 1, image_gray.step);
+  ocr->SetImage(image_binary.data, cols, rows, 1, image_binary.step);
 
   string text = string(ocr->GetUTF8Text());
   cout << text;
