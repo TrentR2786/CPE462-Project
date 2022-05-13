@@ -25,72 +25,48 @@ int main(int argc, char* argv[]) {
 
   //threshold
   Mat image_thresh;
-  threshold(image_blur, image_thresh, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
-  
-  //stupid dilate
-  /*
-  Mat image_dilate;
-  dilate(image_thresh, image_dilate, Mat(), Point(-1,-1), 1);
+  threshold(image_blur, image_thresh, 0, 255, THRESH_BINARY + THRESH_OTSU);
 
-  imshow("Rect Image", image_dilate);
-  waitKey(0);
-  destroyWindow("Rect Image");
-  */
-
-  //find contours
-  vector<vector<Point>> contours;
-  vector<Vec4i> hierarchy;
-  findContours(image_thresh, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-
-  //find+draw rectangles in red
-  Mat image_rect;
-  cvtColor(image_thresh, image_rect, COLOR_GRAY2BGR);
-  vector<Rect> boundRect(contours.size());
-
-  for (size_t i = 0; i < contours.size(); i++) {
-    boundRect[i] = boundingRect(contours[i]);
-    rectangle(image_rect, boundRect[i].tl(), boundRect[i].br(), Scalar(0,0,255));
-  }
-
-  //display rects
-  imshow("Rect Image", image_rect);
-  waitKey(0);
-  destroyWindow("Rect Image");
-
-  // TODO: merge nearby rectangles to create large rectangular blocks with words
-  
-  // test for turning individual boundrects into images for ocr input
-  for (size_t i = 0; i < boundRect.size(); i++) {
-    Mat roitest(image_thresh, Rect(boundRect[i]));
-    imshow("1 Rect", roitest);
-    waitKey(0);
-    destroyWindow("1 Rect");
-  }
-
-  // TODO: crosscheck w/ words.txt to see whether or not to censor
-
-  //draw black boxes on contours (test for censoring)
-  Mat image_censored = image.clone();
-  for (size_t i = 0; i < boundRect.size(); i++) {
-    rectangle(image_censored, boundRect[i].tl(), boundRect[i].br(), Scalar(0,0,0), FILLED);
-  }
-
-  //display censor
-  imshow("Censored Image", image_censored);
-  waitKey(0);
-  destroyWindow("Censored Image");
-
-  /*****************************************/
-  // Code source:
-  // https://medium.com/building-a-simple-text-correction-tool/basic-ocr-with-tesseract-and-opencv-34fae6ab3400
-  tesseract::TessBaseAPI* ocr = new tesseract::TessBaseAPI();
+  //initialize optical character recognition
+  tesseract::TessBaseAPI *ocr = new tesseract::TessBaseAPI();
   ocr->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY);
-  ocr->SetPageSegMode(tesseract::PSM_AUTO);
   ocr->SetImage(image_thresh.data, image_thresh.cols, image_thresh.rows, 1, image_thresh.step);
+  ocr->Recognize(0);
+  
+  //initialize iterator to detect every individual word
+  tesseract::ResultIterator* it = ocr->GetIterator();
+  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
 
-  string text = string(ocr->GetUTF8Text());
-  cout << text;
+  //initialize censored output image
+  Mat image_censored = image.clone();
+
+  //go through every word detected
+  if (it != 0) {
+    do {
+      //detect coordinates
+      const char* word = it->GetUTF8Text(level);
+      int tlx, tly, brx, bry;
+      it->BoundingBox(level, &tlx, &tly, &brx, &bry);
+
+      //word information
+      cout << "word: '" << word << "'; Coords: (" << tlx << "," << tly << "), (" << brx << "," << bry << ")" << endl;
+
+      // TODO: crosscheck w/ words.txt to see whether or not to censor
+
+      //draw censor box on word
+      rectangle(image_censored, Point(tlx,tly), Point(brx, bry), Scalar(0,0,0), FILLED);
+
+      delete[] word;
+    } while (it->Next(level));
+  }
+
+  //display input and output
+  imshow("Input", image);
+  imshow("Output", image_censored);
+  waitKey(0);
+  destroyWindow("Input");
+  destroyWindow("Output");
+
   ocr->End();
   return 0;
-  /*****************************************/
 }
