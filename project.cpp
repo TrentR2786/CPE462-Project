@@ -1,8 +1,7 @@
 #include <leptonica/allheaders.h>
 #include <tesseract/baseapi.h>
-
-#include <iostream>
 #include <opencv2/opencv.hpp>
+#include <iostream>
 #include <string>
 
 using namespace std;
@@ -28,6 +27,16 @@ int main(int argc, char* argv[]) {
   Mat image_thresh;
   threshold(image_blur, image_thresh, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
   
+  //stupid dilate
+  /*
+  Mat image_dilate;
+  dilate(image_thresh, image_dilate, Mat(), Point(-1,-1), 1);
+
+  imshow("Rect Image", image_dilate);
+  waitKey(0);
+  destroyWindow("Rect Image");
+  */
+
   //find contours
   vector<vector<Point>> contours;
   vector<Vec4i> hierarchy;
@@ -48,9 +57,21 @@ int main(int argc, char* argv[]) {
   waitKey(0);
   destroyWindow("Rect Image");
 
+  // TODO: merge nearby rectangles to create large rectangular blocks with words
+  
+  // test for turning individual boundrects into images for ocr input
+  for (size_t i = 0; i < boundRect.size(); i++) {
+    Mat roitest(image_thresh, Rect(boundRect[i]));
+    imshow("1 Rect", roitest);
+    waitKey(0);
+    destroyWindow("1 Rect");
+  }
+
+  // TODO: crosscheck w/ words.txt to see whether or not to censor
+
   //draw black boxes on contours (test for censoring)
   Mat image_censored = image.clone();
-  for (size_t i = 0; i < contours.size(); i++) {
+  for (size_t i = 0; i < boundRect.size(); i++) {
     rectangle(image_censored, boundRect[i].tl(), boundRect[i].br(), Scalar(0,0,0), FILLED);
   }
 
