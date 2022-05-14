@@ -9,6 +9,21 @@ using namespace std;
 using namespace cv;
 using namespace tesseract;
 
+string normalize(string word) {
+  //Make whole word lowercase, ignore case sensitivity
+  transform(word.begin(), word.end(), word.begin(), ::tolower);
+
+  //Remove all non-alphanumeric characters from word
+  for (auto it = word.begin(); it != word.end(); it++) {
+    if (!isalnum(word.at(it - word.begin()))) {
+      word.erase(it);
+      it--;
+    }
+  }
+
+  return word;
+}
+
 int main(int argc, char* argv[]) {
   //Check for correct number of arguments
   if (argc != 4) {
@@ -78,12 +93,12 @@ int main(int argc, char* argv[]) {
     int space_pos = censoredWords.find(" ", current_pos);
     if (space_pos != string::npos) {
       string censoredWord = censoredWords.substr(current_pos, space_pos - current_pos);
-      transform(censoredWord.begin(), censoredWord.end(), censoredWord.begin(), ::tolower);
+      censoredWord = normalize(censoredWord);
       censorList.push_back(censoredWord);
       current_pos = space_pos + 1;
     } else {
       string censoredWord = censoredWords.substr(current_pos);
-      transform(censoredWord.begin(), censoredWord.end(), censoredWord.begin(), ::tolower);
+      censoredWord = normalize(censoredWord);
       censorList.push_back(censoredWord);
       break;
     }
@@ -100,18 +115,16 @@ int main(int argc, char* argv[]) {
   //Go through every word detected
   if (it != 0) {
     do {
-      //Detect coordinates from image using Tesseract
+      //Detect bounding box coordinates from image using Tesseract
       string word = string(it->GetUTF8Text(level));
       int tlx, tly, brx, bry;
       it->BoundingBox(level, &tlx, &tly, &brx, &bry);
 
-      //Print word information (DEBUG)
+      //Print coordinate information (DEBUG)
       // cout << "word: '" << word << "'; Coords: (" << tlx << "," << tly << "),
       // (" << brx << ", " << bry << ") " << endl;
 
-      //Ignore case sensitivity
-      transform(word.begin(), word.end(), word.begin(), ::tolower);
-      //TODO Remove non-alphanumeric characters from Tesseract's word list
+      word = normalize(word);
 
       //Draw censor box on word if it matches with list
       for (int i = 0; i < censorList.size(); i++) {
@@ -132,6 +145,7 @@ int main(int argc, char* argv[]) {
   destroyWindow("Output");
 
   ocr->End();
+  //Save output image
   imwrite(argv[3], image_censored);
   return 0;
 }
