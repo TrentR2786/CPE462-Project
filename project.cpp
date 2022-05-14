@@ -1,11 +1,11 @@
-/ #include<leptonica / allheaders.h>
+#include <leptonica / allheaders.h>
 #include <tesseract/baseapi.h>
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <string>
 
-    using namespace std;
+using namespace std;
 using namespace cv;
 using namespace tesseract;
 
