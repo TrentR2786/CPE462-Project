@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   Mat image_thresh;
   threshold(image_blur, image_thresh, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
 
-  //Deskew and rotate image
+  // Deskew and rotate image
   vector<Point> points;
   Mat_<uchar>::iterator curr = image_thresh.begin<uchar>();
   Mat_<uchar>::iterator end = image_thresh.end<uchar>();
@@ -47,10 +47,12 @@ int main(int argc, char* argv[]) {
   }
 
   RotatedRect rect = minAreaRect(Mat(points));
-  Mat rot_mat = getRotationMatrix2D(rect.center, rect.angle < -45 ? rect.angle += 90 : rect.angle, 1);
-  
+  Mat rot_mat = getRotationMatrix2D(
+      rect.center, rect.angle < -45 ? rect.angle += 90 : rect.angle, 1);
+
   Mat image_rot;
-  warpAffine(image_thresh, image_rot, rot_mat, image_thresh.size(), cv::INTER_CUBIC);
+  warpAffine(image_thresh, image_rot, rot_mat, image_thresh.size(),
+             cv::INTER_CUBIC);
   bitwise_not(image_rot, image_rot);
 
   // initialize optical character recognition
@@ -87,7 +89,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  //censor word list debug
+  // censor word list debug
   /*
   for (int i = 0; i < censorList.size(); i++) {
     cout << censorList[i] << endl;
@@ -118,14 +120,14 @@ int main(int argc, char* argv[]) {
     } while (it->Next(level));
   }
 
-  //Display input and output images
-  cv::imshow("Input", image);
-  cv::imshow("Preprocessed", image_rot);
-  cv::imshow("Output", image_censored);
-  cv::waitKey(0);
-  cv::destroyWindow("Input");
-  cv::destroyWindow("Preprocessed");
-  cv::destroyWindow("Output");
+  // Display input and output images
+  imshow("Input", image);
+  imshow("Preprocessed", image_rot);
+  imshow("Output", image_censored);
+  waitKey(0);
+  destroyWindow("Input");
+  destroyWindow("Preprocessed");
+  destroyWindow("Output");
 
   ocr->End();
   imwrite(argv[3], image_censored);
