@@ -44,23 +44,26 @@ int main(int argc, char* argv[]) {
   Mat image_gray;
   cvtColor(image, image_gray, COLOR_BGR2GRAY);
 
-  // 3x3 averaging filter to blur image and remove noise
+  // Rescale image for better legibility
+  Mat image_scaled;
+  resize(image_gray, image_scaled, Size(0,0), 1.2, 1.2, INTER_CUBIC);
+
+  // Gaussian blur the image to remove noise
   Mat image_blur;
-  blur(image_gray, image_blur, Size(3, 3));
+  GaussianBlur(image_scaled, image_blur, Size(0,0), 33, 33);
+  divide(image_scaled, image_blur, image_blur, 255);
 
   // Binarization mask to convert text to 255 and everything else to 0
   Mat image_thresh;
   threshold(image_blur, image_thresh, 0, 255, THRESH_BINARY_INV + THRESH_OTSU);
 
-  // Deskew code based on modified version of code from
-  // http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/ Find all
-  // points in skewed image
+  // Modified deskew code based on original code from
+  // http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/
+  // Find all points in skewed image
   vector<Point> points;
-  Mat_<uchar>::iterator curr = image_thresh.begin<uchar>();
-  Mat_<uchar>::iterator end = image_thresh.end<uchar>();
-  for (; curr != end; ++curr) {
-    if (*curr) {
-      points.push_back(curr.pos());
+  for (Mat_<uchar>::iterator it = image_thresh.begin<uchar>(); it != image_thresh.end<uchar>(); ++it) {
+    if (*it) {
+      points.push_back(it.pos());
     }
   }
 
@@ -77,8 +80,9 @@ int main(int argc, char* argv[]) {
   // Invert binarization mask so Tesseract can read it more accurately
   bitwise_not(image_rot, image_rot);
 
-  // Tesseract API code based on code from:
+  // Modified Tesseract API code based on original examples from
   // https://medium.com/building-a-simple-text-correction-tool/basic-ocr-with-tesseract-and-opencv-34fae6ab3400
+  // https://tesseract-ocr.github.io/tessdoc/APIExample.html
   // Initialize optical character recognition library
   TessBaseAPI* ocr = new TessBaseAPI();
   ocr->Init(NULL, "eng", OEM_LSTM_ONLY);
@@ -120,9 +124,7 @@ int main(int argc, char* argv[]) {
   }
   */
 
-  // Result iterator code based on modified example from Tesseract
-  // documentation: https://tesseract-ocr.github.io/tessdoc/APIExample.html Go
-  // through every word detected
+  // Go through every word detected
   if (it != 0) {
     do {
       // Detect bounding box coordinates from image using Tesseract
