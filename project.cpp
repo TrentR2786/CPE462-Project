@@ -38,11 +38,11 @@ int main(int argc, char* argv[]) {
 
   //Deskew and rotate image
   vector<Point> points;
-  Mat_<uchar>::iterator it = image_thresh.begin<uchar>();
+  Mat_<uchar>::iterator curr = image_thresh.begin<uchar>();
   Mat_<uchar>::iterator end = image_thresh.end<uchar>();
-  for (; it != end; ++it) {
-    if (*it) {
-      points.push_back(it.pos());
+  for (; curr != end; ++curr) {
+    if (*curr) {
+      points.push_back(curr.pos());
     }
   }
 
@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
   Mat image_rot;
   warpAffine(image_thresh, image_rot, rot_mat, image_thresh.size(), cv::INTER_CUBIC);
   bitwise_not(image_rot, image_rot);
-  image_rot = deskew(image_thresh);
 
   // initialize optical character recognition
   // Code Source:
