@@ -27,9 +27,7 @@ string normalize(string word) {
 int main(int argc, char* argv[]) {
   // Check for correct number of arguments
   if (argc != 4) {
-    cout << "Usage: " << argv[0]
-         << " <input filename> <list of censored words (in one quote, words "
-            "separated by spaces)> <output filename>";
+    cout << "Usage: " << argv[0] << " <input filename> <list of censored words (in one quote, words separated by spaces)> <output filename>";
     return -1;
   }
 
@@ -69,13 +67,11 @@ int main(int argc, char* argv[]) {
 
   // Create largest bounding box and rotation matrix for skewed image
   RotatedRect rect = minAreaRect(Mat(points));
-  Mat rot_mat = getRotationMatrix2D(
-      rect.center, rect.angle < -45 ? rect.angle += 90 : rect.angle, 1);
+  Mat rot_mat = getRotationMatrix2D(rect.center, rect.angle < -45 ? rect.angle += 90 : rect.angle, 1);
 
   // Deskew image
   Mat image_rot;
-  warpAffine(image_thresh, image_rot, rot_mat, image_thresh.size(),
-             INTER_CUBIC);
+  warpAffine(image_thresh, image_rot, rot_mat, image_thresh.size(), INTER_CUBIC);
 
   // Invert binarization mask so Tesseract can read it more accurately
   bitwise_not(image_rot, image_rot);
@@ -86,8 +82,7 @@ int main(int argc, char* argv[]) {
   // Initialize optical character recognition library
   TessBaseAPI* ocr = new TessBaseAPI();
   ocr->Init(NULL, "eng", OEM_LSTM_ONLY);
-  ocr->SetImage(image_rot.data, image_rot.cols, image_rot.rows, 1,
-                image_rot.step);
+  ocr->SetImage(image_rot.data, image_rot.cols, image_rot.rows, 1, image_rot.step);
   ocr->Recognize(0);
 
   // Initialize iterator to detect each individual word
@@ -104,8 +99,7 @@ int main(int argc, char* argv[]) {
   while (1) {
     int space_pos = censoredWords.find(" ", current_pos);
     if (space_pos != string::npos) {
-      string censoredWord =
-          censoredWords.substr(current_pos, space_pos - current_pos);
+      string censoredWord = censoredWords.substr(current_pos, space_pos - current_pos);
       censoredWord = normalize(censoredWord);
       censorList.push_back(censoredWord);
       current_pos = space_pos + 1;
@@ -133,17 +127,14 @@ int main(int argc, char* argv[]) {
       it->BoundingBox(level, &tlx, &tly, &brx, &bry);
 
       // Print coordinate information (DEBUG)
-      //  cout << "word: '" << word << "'; Coords: (" << tlx << "," << tly <<
-      //  "),
-      //  (" << brx << ", " << bry << ") " << endl;
+      //  cout << "word: '" << word << "'; Coords: (" << tlx << "," << tly << "), (" << brx << ", " << bry << ") " << endl;
 
       word = normalize(word);
 
       // Draw censor box on word if it matches with list
       for (int i = 0; i < censorList.size(); i++) {
         if (censorList[i].compare(word) == 0) {
-          rectangle(image_censored, Point(tlx, tly), Point(brx, bry),
-                    Scalar(0, 0, 0), FILLED);
+          rectangle(image_censored, Point(tlx, tly), Point(brx, bry), Scalar(0, 0, 0), FILLED);
         }
       }
     } while (it->Next(level));
