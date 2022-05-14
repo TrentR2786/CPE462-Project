@@ -1,11 +1,11 @@
-#include <leptonica/allheaders.h>
+/ #include<leptonica / allheaders.h>
 #include <tesseract/baseapi.h>
 
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <string>
 
-using namespace std;
+    using namespace std;
 using namespace cv;
 using namespace tesseract;
 
@@ -16,6 +16,8 @@ int main(int argc, char* argv[]) {
   }
 
   // read image
+  // Code Sources:
+  // https://www.opencv-srf.com/2017/11/load-and-display-image.html, imgproc.cpp
   Mat image = imread(argv[1]);
   if (image.empty()) {
     cout << "Invalid or missing image." << endl;
@@ -35,6 +37,8 @@ int main(int argc, char* argv[]) {
   threshold(image_blur, image_thresh, 0, 255, THRESH_BINARY + THRESH_OTSU);
 
   // initialize optical character recognition
+  // Code Source:
+  // https://medium.com/building-a-simple-text-correction-tool/basic-ocr-with-tesseract-and-opencv-34fae6ab3400
   TessBaseAPI* ocr = new TessBaseAPI();
   ocr->Init(NULL, "eng", OEM_LSTM_ONLY);
   ocr->SetImage(image_thresh.data, image_thresh.cols, image_thresh.rows, 1,
@@ -66,9 +70,11 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  /*
   for (int i = 0; i < censorList.size(); i++) {
     cout << censorList[i] << endl;
   }
+  */
 
   // go through every word detected
   if (it != 0) {
