@@ -55,7 +55,8 @@ int main(int argc, char* argv[]) {
   while (1) {
     int space_pos = censoredWords.find(" ", current_pos);
     if (space_pos != string::npos) {
-      string censoredWord = censoredWords.substr(current_pos, space_pos);
+      string censoredWord =
+          censoredWords.substr(current_pos, space_pos - current_pos);
       censorList.push_back(censoredWord);
       current_pos = space_pos + 1;
     } else {
@@ -65,11 +66,9 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  /*
   for (int i = 0; i < censorList.size(); i++) {
     cout << censorList[i] << endl;
   }
-  */
 
   // go through every word detected
   if (it != 0) {
